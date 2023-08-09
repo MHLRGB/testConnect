@@ -39,7 +39,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>데이터베이스 CRUD 기능 구현</h1>
+      <h1> 데이터베이스 TestTable CRUD 기능 구현</h1>
       <div>
         <h2>데이터 삽입하기</h2>
         <input
