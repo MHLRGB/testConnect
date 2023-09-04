@@ -1,0 +1,68 @@
+
+--서버(현재 사용 중지)
+
+    서버 접속용 공인 IP : 210.89.180.20
+    외부 포트 : 10101
+
+    서버 이름
+    cpserver
+    관리자 이름
+    root
+    비밀번호 : carpedm10 ( 안되면 :T48d*ycc4Gh )
+
+    사용자 아이디 : carpedm
+
+    mysql -h db-huc0t.cdb.ntruss.com -ucarpedm -p --port 3306
+
+
+-- DB서버 연결(HeidiSQL 연결)
+
+    Private 도메인 : db-huc0t.cdb.ntruss.com
+
+    HeidiSQL 다운로드 링크 : https://www.heidisql.com/download.php#google_vignette
+
+    HeidiSQL 연결 시
+
+    호스트명 : db-huc0t.pub-cdb.ntruss.com 
+    사용자 : carpedm
+    암호 : !carpedm1
+    포트 : 3306
+
+-- node js로 DB 테이블 연결
+
+- 개발 환경 구성
+
+    npm install express
+
+    npm install mysql
+
+    npm install cors
+
+    package.json에서 마지막 괄호 바로 위에 추가
+
+    "proxy": "http://localhost:5000/",
+    "secure": false
+
+
+- 서버가 연결된 클라이언트 실행 방법
+
+    server 디렉토리에서
+
+    node server.js
+
+    중지하지 않고 그대로 새 터미널 열고
+
+    npm start
+
+
+- 연결 안될떄
+
+    고급 보안이 포함된 Windows Defender 방화벽 - 인바운드 규칙 - 새 규칙
+
+    규칙 종류 : 포트
+
+    특정 로컬 포트 : 5000
+
+    연결 허용
+
+
