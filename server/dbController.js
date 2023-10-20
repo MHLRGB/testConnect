@@ -3,11 +3,11 @@
 const mysql = require('mysql');
 
 const dbConfig = {
-  host: 'db-huc0t.pub-cdb.ntruss.com',
+  host: '192.168.0.53',
   port: '3306',
-  user: 'carpedm',
-  password: '!carpedm1',
-  database: 'cpdb'
+  user: 'munhwan',
+  password: 'back4607',
+  database: 'aiot'
 };
 
 module.exports = {
@@ -21,10 +21,10 @@ fetchDataFromDatabase: function (callback) {
         return;
       }
       
-      const query = 'SELECT * FROM TestTable';
+      const query = 'SELECT * FROM login';
       connection.query(query, (err, rows) => {
         if (err) {
-          console.error('Error fetching data from TestTable: ' + err);
+          console.error('Error fetching data from login: ' + err);
           callback(err, null);
         } else {
           callback(null, rows);

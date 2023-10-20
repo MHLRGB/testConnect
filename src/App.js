@@ -1,78 +1,106 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-
+import { handleRunExe } from './clientFunctions';
 function App() {
-  const [data, setData] = useState([]);
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
+  const [fileContents, setFileContents] = useState([]);
+  const [ws, setWs] = useState(null);
+  const [timerId, setTimerId] = useState(null);
+  const [exeResult, setExeResult] = useState(''); // 실행 결과를 저장할 상태 변수
+  
+  const [imageData, setImageData] = useState(null);
+  const [csvData, setCsvData] = useState(null);
+
+  const connectWebSocket = () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      console.log('WebSocket is already open.');
+      return;
+    }
+
+    const newWs = new WebSocket('ws://localhost:5000');
+
+    newWs.onmessage = (event) => {
+      const [contentType, data] = event.data.split(' '); // 서버에서 content-type을 메시지에 포함
+  
+      if (contentType.startsWith('image/')) {
+        // 이미지 데이터 처리
+        setImageData(data);
+      } else if (contentType === 'text/csv') {
+        // CSV 파일 데이터 처리
+        setCsvData(data);
+      }
+    };
+    
+    setWs(newWs);
+
+    newWs.onopen = () => {
+      setFileContents((prevContents) => [...prevContents, "파일 감지기 실행 중..."]);
+    }
+
+    // 30초 타이머 시작
+    const timer = setTimeout(() => {
+      if (newWs.readyState === WebSocket.OPEN) {
+        newWs.close();
+        console.log('WebSocket connection closed after 30 seconds.');
+        setWs(null);
+      }
+    }, 300000); // 300초를 밀리초로 변환
+    setTimerId(timer);
+  };
+
+  const closeWebSocket = () => {
+    if (ws) {
+      ws.close();
+      console.log('WebSocket connection closed');
+      setWs(null);
+      // 타이머 초기화
+      if (timerId) {
+        clearTimeout(timerId);
+        setTimerId(null);
+      }
+    }
+  };
 
   useEffect(() => {
-    fetchData();
+    connectWebSocket();
+    return () => {
+      closeWebSocket();
+    };
   }, []);
-
-  const fetchData = () => {
-    fetch('/api/getdata')
-      .then(response => response.json())
-      .then(data => setData(data))
-      .catch(error => console.error('Error fetching data:', error));
-  };
-
-  const handleInsert = () => {
-    const newData = { name, address };
-
-    fetch('/api/insertdata', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newData)
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Data inserted successfully:', data);
-        setName('');
-        setAddress('');
-        fetchData(); // 삽입 후 데이터 다시 불러오기
-      })
-      .catch(error => console.error('Error inserting data:', error));
-  };
 
   return (
     <div className="App">
-      <h1> 데이터베이스 TestTable CRUD 기능 구현</h1>
-      <div>
-        <h2>데이터 삽입하기</h2>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={address}
-          onChange={e => setAddress(e.target.value)}
-        />
-        <button onClick={handleInsert}>Insert</button>
-      </div>
-      <h2>데이터 출력</h2>
-      <div style={{ display: 'flex', justifyContent: 'center'}}>
-        <table style={{border:'solid 1px black', width: '450px'}}>
-          <thead>
-            <th>이름</th>
-            <th>날짜</th>
-            <th>주소</th>
-          </thead>
-          {data.map(item => (
-            <tr key={item.no}>
-              <td>{item.name}</td>
-              <td>{item.regDate}</td>
-              <td>{item.address}</td>
-            </tr>
-          ))}
-        </table>
-      </div>
+      <h1>Real-time File Content</h1>
+      {ws ? (
+        <button onClick={closeWebSocket}>Close WebSocket</button>
+      ) : (
+        <button onClick={connectWebSocket}>Connect WebSocket</button>
+      )}
+      <ul>
+        <li>파일 감지기 변화</li>
+        {fileContents.map((content, index) => (
+          <li key={index}>{content}</li>
+        ))}
+      </ul>
+      <ul>
+      <h2>EXE 실행 결과:</h2>
+        <pre>{exeResult}</pre>
+      </ul>
+          <div>
+          {imageData && (
+            <div>
+              <h2>이미지</h2>
+              <img src={`data:image/png;base64,${imageData}`} alt="이미지" />
+            </div>
+          )}
+        </div>
+        <div>
+          {csvData && (
+        <div>
+          <h2>CSV 파일</h2>
+          <pre>{csvData}</pre>
+        </div>
+           )}
+        </div>  
     </div>
   );
 }
